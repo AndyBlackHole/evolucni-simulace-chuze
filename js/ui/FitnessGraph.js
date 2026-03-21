@@ -4,8 +4,9 @@ export class FitnessGraph {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.history = [];
-        this.maxPoints = 100; // Ukážeme posledních 100 generací
-        this.padding = 40;    // Odsazení pro texty a osy
+        this.maxPoints = 100; 
+        // OPRAVA: Větší odsazení, aby se nám vlevo vešla čísla osy Y
+        this.padding = 50;    
     }
 
     addDataPoint(fitness) {
@@ -28,15 +29,23 @@ export class FitnessGraph {
         const h = this.canvas.height;
         const p = this.padding;
 
-        const minFitness = Math.min(...this.history);
-        const maxFitness = Math.max(...this.history);
-        const range = (maxFitness - minFitness === 0) ? 1 : (maxFitness - minFitness);
+        let minFitness = Math.min(0, ...this.history); 
+        let actualMax = Math.max(...this.history);
+        
+        let maxFitness = actualMax > 0 ? actualMax * 1.2 : 100;
+        
+        if (maxFitness - minFitness < 1) {
+             maxFitness = 100;
+        }
+
+        const range = (maxFitness - minFitness);
 
         // Kreslení os X a Y
         ctx.beginPath();
-        ctx.moveTo(p, p / 2); // Osa Y
-        ctx.lineTo(p, h - p);
-        ctx.lineTo(w - p / 2, h - p); // Osa X
+        ctx.moveTo(p, p / 2); // Osa Y nahoře
+        ctx.lineTo(p, h - p + 5); // Osa Y dole (mírný přesah)
+        ctx.moveTo(p - 5, h - p); // Osa X vlevo (mírný přesah)
+        ctx.lineTo(w - p / 2, h - p); // Osa X vpravo
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 2;
         ctx.stroke();
@@ -47,34 +56,33 @@ export class FitnessGraph {
         ctx.textAlign = "center";
         ctx.fillText("Generace", w / 2, h - 5); 
 
-        // --- OPRAVENÉ ČÍSLOVÁNÍ OSY X ---
+        // --- INTELIGENTNÍ ČÍSLOVÁNÍ OSY X ---
         ctx.font = "10px sans-serif";
         const numPoints = this.history.length;
         
         if (numPoints > 0) {
-            // Vypočítáme krok, aby bylo na ose zhruba 5 orientačních bodů
-            const step = Math.max(1, Math.ceil(numPoints / 5)); 
+            let stepX = 1; // Standardně každá generace
+            if (numPoints > 50) stepX = 10; // Nad 50 generací ukazujeme desítky
+            else if (numPoints > 20) stepX = 5; // Nad 20 generací ukazujeme pětky
 
             for (let i = 0; i < numPoints; i++) {
-                // Vykreslíme popisek jen pro první, poslední a každou 'step' generaci.
-                // Podmínka navíc hlídá, aby se předposlední číslo nepletlo přes to poslední.
-                if (i === 0 || i === numPoints - 1 || (i % step === 0 && (numPoints - 1 - i) > step * 0.5)) {
-                    
+                const genNum = i + 1; 
+                
+                // Vykreslíme vždy první, vždy poslední a pak násobky stepX
+                // Podmínka zaručí, že se předposlední neplete s posledním číslem
+                if (genNum === 1 || genNum === numPoints || (genNum % stepX === 0 && (numPoints - genNum) >= stepX * 0.6)) {
                     const xPos = numPoints === 1 ? p : p + (i / (numPoints - 1)) * (w - p * 1.5);
-                    const genNum = i + 1; // Generace se počítají od 1
-
-                    // Značka (čárka) na ose
+                    
                     ctx.beginPath();
                     ctx.moveTo(xPos, h - p);
                     ctx.lineTo(xPos, h - p + 5);
                     ctx.stroke();
 
-                    // Číslo pod osou
                     ctx.fillText(genNum, xPos, h - p + 18);
                 }
             }
         }
-        // --------------------------------
+        // ------------------------------------
         
         // Popisek osy Y
         ctx.save();
@@ -86,24 +94,34 @@ export class FitnessGraph {
         ctx.fillText("Fitness (Skóre)", 0, 0); 
         ctx.restore();
 
-        // Hodnoty na ose Y (Max a Min)
+        // --- INTELIGENTNÍ ČÍSLOVÁNÍ OSY Y ---
         ctx.textAlign = "right";
-        ctx.fillText(Math.floor(maxFitness), p - 5, p);
-        ctx.fillText(Math.floor(minFitness), p - 5, h - p);
+        const ySteps = 4; // Rozdělíme osu Y na 4 úseky (tzn. 5 čísel)
+        
+        for (let i = 0; i <= ySteps; i++) {
+            const val = minFitness + (range * (i / ySteps));
+            const yPos = (h - p) - ((i / ySteps) * (h - p * 1.5));
+            
+            // Nakreslíme malou čárku na ose Y
+            ctx.beginPath();
+            ctx.moveTo(p - 5, yPos);
+            ctx.lineTo(p, yPos);
+            ctx.stroke();
 
-        // Pokud máme jen jeden bod, nakreslíme tečku
+            // Vypíšeme číslo (zaokrouhlené dolů)
+            ctx.fillText(Math.floor(val), p - 8, yPos + 4);
+        }
+        // ------------------------------------
+
+        // Pokud máme jen jeden bod
         if (this.history.length === 1) {
             ctx.beginPath();
-            ctx.arc(p, h - p, 3, 0, Math.PI * 2);
+            const yPos = (h - p) - (((this.history[0] - minFitness) / range) * (h - p * 1.5));
+            ctx.arc(p, yPos, 4, 0, Math.PI * 2);
             ctx.fillStyle = "#2b7b2b";
             ctx.fill();
             return;
         }
-
-        // Kreslení samotné křivky grafu
-        ctx.beginPath();
-        ctx.strokeStyle = "#2b7b2b";
-        ctx.lineWidth = 2.5;
 
         // Omezíme kreslení přesně na oblast uvnitř os (Clipping)
         ctx.save();
@@ -111,7 +129,10 @@ export class FitnessGraph {
         ctx.rect(p, 0, w - p, h - p);
         ctx.clip();
 
+        // 1. Kreslení čáry
         ctx.beginPath();
+        ctx.strokeStyle = "#2b7b2b";
+        ctx.lineWidth = 2.5;
         for (let i = 0; i < this.history.length; i++) {
             const x = p + (i / (this.history.length - 1)) * (w - p * 1.5);
             const normalized = (this.history[i] - minFitness) / range;
@@ -121,6 +142,19 @@ export class FitnessGraph {
             else ctx.lineTo(x, y);
         }
         ctx.stroke();
+
+        // 2. Vykreslení bodů (teček) pro jednotlivé generace
+        ctx.fillStyle = "#1e5c1e"; 
+        for (let i = 0; i < this.history.length; i++) {
+            const x = p + (i / (this.history.length - 1)) * (w - p * 1.5);
+            const normalized = (this.history[i] - minFitness) / range;
+            const y = (h - p) - (normalized * (h - p * 1.5));
+
+            ctx.beginPath();
+            ctx.arc(x, y, 3.5, 0, Math.PI * 2); 
+            ctx.fill();
+        }
+
         ctx.restore(); // Zrušení clippingu
     }
 }
