@@ -25,6 +25,7 @@ export class PhysicsEngine {
     step() {
 
         const c = this.creature;
+        const ground = CONFIG.SIMULATION.GROUND_Y; // NOVÉ: Definice země pro pojistku
 
         // --- EFEKT VYČERPÁNÍ: POMALÝ PÁD KULIČKY NA ZEM ---
         if (c.currentStep >= c.genes.length) {
@@ -37,6 +38,11 @@ export class PhysicsEngine {
             c.currentA2R += clamp(0 - c.currentA2R, -turnSpeed, turnSpeed);
 
             this.computeLegsPosition();
+            
+            // --- OPRAVA: Kontrola země i pro nohy během pádu ---
+            this.handleGroundCollisionLeft();
+            this.handleGroundCollisionRight();
+            // --------------------------------------------------
 
             // Tělo padá k zemi zlehka jako peříčko
             c.bodyY += 1; // Gravitace zpomalena z 5 na 1
@@ -81,6 +87,12 @@ export class PhysicsEngine {
 
         // Aplikace gravitace na tělo
         c.bodyY += 2; 
+        
+        // --- NOVÉ: Pojistka pro tělo: Aby ani břicho nepropadlo pod zem ---
+        if (c.bodyY > ground - CONFIG.CREATURE.BODY_RADIUS) {
+            c.bodyY = ground - CONFIG.CREATURE.BODY_RADIUS;
+        }
+        // -----------------------------------------------------------------
 
         // 5) Zpomalené přepínání genů
         this.frameCount++;
@@ -123,7 +135,8 @@ export class PhysicsEngine {
             const penetration = c.footLY - ground;
             c.footLY = ground;
             c.kneeLY -= penetration * 0.5;
-            c.bodyY  -= penetration * 0.25;
+            // Zmírněno nakopnutí těla (z 0.25 na 0.1), aby příšerka nelítala
+            c.bodyY  -= penetration * 0.1;
             return true;
         }
         return false;
@@ -136,7 +149,8 @@ export class PhysicsEngine {
             const penetration = c.footRY - ground;
             c.footRY = ground;
             c.kneeRY -= penetration * 0.5;
-            c.bodyY  -= penetration * 0.25;
+            // Zmírněno nakopnutí těla (z 0.25 na 0.1)
+            c.bodyY  -= penetration * 0.1;
             return true;
         }
         return false;
