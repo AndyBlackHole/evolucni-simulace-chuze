@@ -39,6 +39,6 @@ export const CONFIG = {
         GROUND_Y: 235,              // mírně níž, aby nohy měly dobrý kontakt
         STEPS_PER_FRAME: 1,         // 1 krok fyziky na frame (ovládá main.js SPEED)
         SPEED: 1,                   // výchozí rychlost simulace (1 až 5)
-        TARGET_X: 500              // Pozice cílové vlaječky na ose X
+        TARGET_X: 130 + 500         // Startovní pozice X (130) + výchozí vzdálenost cíle (500) --> pozice cílové vlaječky na ose X
     }
 };

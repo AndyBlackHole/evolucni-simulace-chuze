@@ -129,8 +129,13 @@ export class UIController {
                 let val = parseInt(e.target.value, 10);
                 if (isNaN(val)) val = 500;
                 val = Math.max(200, Math.min(1000, val));
+                
+                // Zobrazení čisté vzdálenosti v UI (např. "500")
                 if (this.targetXVal) this.targetXVal.innerText = val;
-                CONFIG.SIMULATION.TARGET_X = val;
+                
+                // Fyzická pozice vlaječky na plátně = Vzdálenost + Pozice startu (130)
+                CONFIG.SIMULATION.TARGET_X = val + CONFIG.CREATURE.BODY_START_X;
+                
                 this.notifyConfigUpdated();
             });
         }
