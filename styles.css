@@ -1,0 +1,34 @@
+/* Základní nastavení (ponecháno stejné) */
+:root {
+    --bg: #f4f6fa; --panel-bg: #ffffff;
+    --accent: #2f8f2f; --accent-light: #aee8ae;
+    --text: #333333; --text-light: #555555;
+    --border: #d6d6d6; --shadow: rgba(0, 0, 0, 0.08);
+    --radius: 8px; --font-main: "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: var(--bg); font-family: var(--font-main); color: var(--text); }
+
+.app-header { background: var(--accent); color: white; padding: 18px 25px; text-align: center; box-shadow: 0 2px 8px var(--shadow); }
+.app-header h1 { margin: 0 0 4px 0; font-weight: 600; letter-spacing: 0.5px; }
+.app-header p { margin: 0; opacity: 0.9; }
+
+.layout { display: grid; grid-template-columns: 280px auto; gap: 20px; padding: 20px; max-width: 1100px; margin: 0 auto;}
+.side-panel { display: flex; flex-direction: column; gap: 20px; }
+
+.control-panel { background: var(--panel-bg); padding: 20px; border-radius: var(--radius); box-shadow: 0 2px 6px var(--shadow); }
+.control-panel h2, .control-panel h3 { margin-top: 0; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 5px;}
+.control-panel h3 { margin-top: 20px; font-size: 14px; color: var(--accent); }
+.control-panel label { display: block; margin: 12px 0; font-size: 14px; color: var(--text-light); }
+.control-panel input[type="number"], .control-panel input[type="range"] { width: 100%; margin-top: 4px; padding: 5px; border: 1px solid var(--border); border-radius: 4px;}
+.control-panel button { width: 100%; padding: 10px; margin-bottom: 8px; background: var(--accent); border: none; color: white; border-radius: var(--radius); cursor: pointer; font-size: 14px; font-weight: bold; transition: background 0.2s; }
+.control-panel button:hover { background: #257325; }
+
+.simulation-panel { display: flex; flex-direction: column; gap: 20px; }
+.best-simulation-wrapper, .fitness-graph-panel { background: var(--panel-bg); padding: 20px; border-radius: var(--radius); box-shadow: 0 2px 6px var(--shadow); }
+.best-simulation-wrapper h2, .fitness-graph-panel h2 { margin-top: 0; margin-bottom: 15px; font-size: 18px;}
+
+/* Pozadí plátna a grafu pro lepší viditelnost */
+canvas { background: #fafafa; border: 1px solid var(--border); border-radius: 4px; display: block; width: 100%; }
+
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
