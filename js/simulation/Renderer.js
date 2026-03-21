@@ -98,8 +98,8 @@ export class Renderer {
         ctx.fill();
     }
 
-    // NOVÉ: Přijímá parametr targetReached
-    drawPopulation(creatures, generationInfo, targetReached = false) {
+    // Přijímá i parametr maxGenerationsReached
+    drawPopulation(creatures, generationInfo, targetReached = false, maxGenerationsReached = false) {
         this.clear();
         
         const ctx = this.ctx;
@@ -138,7 +138,7 @@ export class Renderer {
         const distLeft = Math.max(0, CONFIG.SIMULATION.TARGET_X - leader.bodyX);
         ctx.fillText(`Zbývá do cíle: ${distLeft.toFixed(0)} px`, 15, 45);
 
-        // --- NOVÉ: VYKRESLENÍ VÍTĚZNÉ OBRAZOVKY ---
+        // --- VYKRESLENÍ VÍTĚZNÉ NEBO KONCOVÉ OBRAZOVKY ---
         if (targetReached) {
             // Ztlumení pozadí
             ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
@@ -156,18 +156,37 @@ export class Renderer {
             ctx.font = "16px Arial";
             ctx.fillText(`Počet kroků k dosažení cíle: ${leader.currentStep}`, this.canvas.width / 2, this.canvas.height / 2 + 45);
 
-            // Obnovíme zarovnání
             ctx.textAlign = "left"; 
-
-            // Vykreslení a aktualizace plynulých konfet
             this.drawPersistentConfetti();
+
+        } else if (maxGenerationsReached) {
+            // Ztlumení pozadí lehce do červena/šeda pro naznačení konce bez úspěchu
+            ctx.fillStyle = "rgba(255, 240, 240, 0.85)";
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            // Nápis
+            ctx.fillStyle = "#d32f2f"; // Červená barva
+            ctx.font = "bold 36px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("Konec simulace ❌", this.canvas.width / 2, this.canvas.height / 2 - 30);
+
+            ctx.fillStyle = "#333";
+            ctx.font = "20px Arial";
+            ctx.fillText(`Dosažen limit: ${generationInfo}. generace`, this.canvas.width / 2, this.canvas.height / 2 + 15);
+            ctx.font = "16px Arial";
+            
+            // Vypsání chybějící vzdálenosti
+            ctx.fillText(`Nejlepšímu jedinci chybělo do cíle: ${distLeft.toFixed(0)} px`, this.canvas.width / 2, this.canvas.height / 2 + 45);
+            
+            ctx.textAlign = "left"; 
+            this.confetti = []; // Zrušíme případné konfety
         } else {
             // Pokud simulace běží, vyčistíme pole konfet (pro Reset)
             this.confetti = [];
         }
     }
 
-    // NOVÁ METODA: Inicializuje a aktualizuje pomalu padající kolečka
+    // Inicializuje a aktualizuje pomalu padající kolečka
     drawPersistentConfetti() {
         const ctx = this.ctx;
         const w = this.canvas.width;
@@ -179,10 +198,10 @@ export class Renderer {
             for (let i = 0; i < 150; i++) {
                 this.confetti.push({
                     x: Math.random() * w,
-                    y: Math.random() * h - h, // Začínají náhodně i nad plátnem
-                    vx: (Math.random() - 0.5) * 1, // Mírný boční sníh
-                    vy: Math.random() * 1.5 + 0.5, // Pomalá pádová rychlost (pixelů za snímek)
-                    radius: Math.random() * 4 + 2, // Poloměr kolečka
+                    y: Math.random() * h - h, 
+                    vx: (Math.random() - 0.5) * 1, 
+                    vy: Math.random() * 1.5 + 0.5, 
+                    radius: Math.random() * 4 + 2, 
                     color: colors[Math.floor(Math.random() * colors.length)],
                     opacity: Math.random() * 0.5 + 0.5
                 });
@@ -192,21 +211,17 @@ export class Renderer {
         // Vykreslíme a posuneme kolečka
         ctx.save();
         for (let c of this.confetti) {
-            // Aktualizace pozice
             c.y += c.vy;
             c.x += c.vx;
 
-            // Pokud dopadne dolů, vrátí se nahoru (nekonečný déšť)
             if (c.y > h) c.y = -c.radius;
 
-            // Vykreslení kulaté konfety
             ctx.beginPath();
             ctx.globalAlpha = c.opacity;
-            ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2); // Kreslíme kruh
+            ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2); 
             ctx.fillStyle = c.color;
             ctx.fill();
         }
         ctx.restore();
-        // ------------------------------------------
     }
 }

@@ -16,7 +16,10 @@ export class UIController {
         this.maxGenInput = document.getElementById("maxGenInput");
         this.maxGenLabel = document.getElementById("maxGenLabel");
 
-        // NOVÉ: Prvky pro pokročilé nastavení evoluce
+        // NOVÉ: Prvek pro elitismus
+        this.elitismInput = document.getElementById("elitismInput");
+
+        // Prvky pro pokročilé nastavení evoluce
         this.geneLengthInput = document.getElementById("geneLengthInput");
         this.geneLengthVal = document.getElementById("geneLengthVal");
         
@@ -54,7 +57,7 @@ export class UIController {
             this.notifyConfigUpdated();
         });
 
-        // Logika pro zaškrtávací políčko
+        // Logika pro zaškrtávací políčko (Nekonečný běh)
         this.infiniteRunInput.addEventListener("change", () => {
             const isInfinite = this.infiniteRunInput.checked;
             this.maxGenInput.disabled = isInfinite;
@@ -72,7 +75,15 @@ export class UIController {
             this.notifyConfigUpdated();
         });
 
-        // --- NOVÉ: Logika pro posuvníky ---
+        // --- NOVÉ: Logika pro elitismus ---
+        if (this.elitismInput) {
+            this.elitismInput.addEventListener("change", () => {
+                CONFIG.EVOLUTION.ELITISM_ENABLED = this.elitismInput.checked;
+                this.notifyConfigUpdated();
+            });
+        }
+
+        // Logika pro posuvníky
         if (this.geneLengthInput) {
             this.geneLengthInput.addEventListener("input", (e) => {
                 const val = parseInt(e.target.value, 10);
