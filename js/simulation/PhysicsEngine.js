@@ -26,11 +26,11 @@ export class PhysicsEngine {
 
         const c = this.creature;
 
-        // --- EFEKT VYČERPÁNÍ: PÁD KULIČKY NA ZEM ---
+        // --- EFEKT VYČERPÁNÍ: POMALÝ PÁD KULIČKY NA ZEM ---
         if (c.currentStep >= c.genes.length) {
             
-            // Uvolnění svalů - nohy se složí pod tělo
-            const turnSpeed = 4;
+            // Uvolnění svalů - nohy se složí pod tělo mnohem pomaleji (animace umírání)
+            const turnSpeed = 1.5; // Zpomaleno z 8 na 1.5
             c.currentA1L += clamp(90 - c.currentA1L, -turnSpeed, turnSpeed);
             c.currentA2L += clamp(0 - c.currentA2L, -turnSpeed, turnSpeed);
             c.currentA1R += clamp(90 - c.currentA1R, -turnSpeed, turnSpeed);
@@ -38,10 +38,11 @@ export class PhysicsEngine {
 
             this.computeLegsPosition();
 
-            // Tělo padá na zem
-            c.bodyY += 5; 
+            // Tělo padá k zemi zlehka jako peříčko
+            c.bodyY += 1; // Gravitace zpomalena z 5 na 1
             const ground = CONFIG.SIMULATION.GROUND_Y;
 
+            // Náraz na zem
             if (c.bodyY >= ground - CONFIG.CREATURE.BODY_RADIUS) {
                 c.bodyY = ground - CONFIG.CREATURE.BODY_RADIUS;
                 c.isFullyCollapsed = true; 
@@ -59,7 +60,7 @@ export class PhysicsEngine {
         c.prevA1R = c.currentA1R;
         c.prevA2R = c.currentA2R;
 
-        // RADIKÁLNÍ ZPOMALENÍ NOHY: Noha se může za snímek pohnout max o 2 stupně!
+        // RADIKÁLNÍ ZPOMALENÍ NOHY pro běžnou chůzi
         const turnSpeed = 2; 
         c.currentA1L += clamp(gene.a1L - c.currentA1L, -turnSpeed, turnSpeed);
         c.currentA2L += clamp(gene.a2L - c.currentA2L, -turnSpeed, turnSpeed);
