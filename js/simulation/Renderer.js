@@ -6,6 +6,8 @@ export class Renderer {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
+        // Inicializace pole pro konfety
+        this.confetti = [];
     }
 
     clear() {
@@ -138,28 +140,73 @@ export class Renderer {
 
         // --- NOVÉ: VYKRESLENÍ VÍTĚZNÉ OBRAZOVKY ---
         if (targetReached) {
-            // Poloprůhledný překryv, který ztlumí pozadí
+            // Ztlumení pozadí
             ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
             ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-            // Hlavní nadpis
+            // Nápis
             ctx.fillStyle = "#2f8f2f";
             ctx.font = "bold 36px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Bylo dosaženo cíle! 🚩", this.canvas.width / 2, this.canvas.height / 2 - 30);
 
-            // Detaily o vítězi
             ctx.fillStyle = "#333";
             ctx.font = "20px Arial";
             ctx.fillText(`Úspěšná generace: ${generationInfo}`, this.canvas.width / 2, this.canvas.height / 2 + 15);
-            
-            // Zajímavý parametr: Kolik z genetického kódu příšerka spotřebovala
             ctx.font = "16px Arial";
             ctx.fillText(`Počet kroků k dosažení cíle: ${leader.currentStep}`, this.canvas.width / 2, this.canvas.height / 2 + 45);
 
-            // Obnovíme zarovnání textu pro další případné vykreslování po resetu
+            // Obnovíme zarovnání
             ctx.textAlign = "left"; 
+
+            // Vykreslení a aktualizace plynulých konfet
+            this.drawPersistentConfetti();
+        } else {
+            // Pokud simulace běží, vyčistíme pole konfet (pro Reset)
+            this.confetti = [];
         }
+    }
+
+    // NOVÁ METODA: Inicializuje a aktualizuje pomalu padající kolečka
+    drawPersistentConfetti() {
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        // Inicializujeme konfety pouze jednou při prvním protnutí cíle
+        if (this.confetti.length === 0) {
+            const colors = ["#2ecc71", "#f1c40f", "#e67e22", "#e74c3c", "#3498db"];
+            for (let i = 0; i < 150; i++) {
+                this.confetti.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h - h, // Začínají náhodně i nad plátnem
+                    vx: (Math.random() - 0.5) * 1, // Mírný boční sníh
+                    vy: Math.random() * 1.5 + 0.5, // Pomalá pádová rychlost (pixelů za snímek)
+                    radius: Math.random() * 4 + 2, // Poloměr kolečka
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    opacity: Math.random() * 0.5 + 0.5
+                });
+            }
+        }
+
+        // Vykreslíme a posuneme kolečka
+        ctx.save();
+        for (let c of this.confetti) {
+            // Aktualizace pozice
+            c.y += c.vy;
+            c.x += c.vx;
+
+            // Pokud dopadne dolů, vrátí se nahoru (nekonečný déšť)
+            if (c.y > h) c.y = -c.radius;
+
+            // Vykreslení kulaté konfety
+            ctx.beginPath();
+            ctx.globalAlpha = c.opacity;
+            ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2); // Kreslíme kruh
+            ctx.fillStyle = c.color;
+            ctx.fill();
+        }
+        ctx.restore();
         // ------------------------------------------
     }
 }

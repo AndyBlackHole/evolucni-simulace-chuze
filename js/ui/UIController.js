@@ -1,3 +1,4 @@
+// UIController.js
 import { CONFIG } from "../config.js";
 
 export class UIController {
@@ -10,10 +11,20 @@ export class UIController {
         this.mutationRateInput = document.getElementById("mutationRateInput");
         this.simSpeedInput = document.getElementById("simSpeedInput");
         
-        // Nové prvky pro limit
+        // Prvky pro limit
         this.infiniteRunInput = document.getElementById("infiniteRunInput");
         this.maxGenInput = document.getElementById("maxGenInput");
         this.maxGenLabel = document.getElementById("maxGenLabel");
+
+        // NOVÉ: Prvky pro pokročilé nastavení evoluce
+        this.geneLengthInput = document.getElementById("geneLengthInput");
+        this.geneLengthVal = document.getElementById("geneLengthVal");
+        
+        this.mutStrengthInput = document.getElementById("mutStrengthInput");
+        this.mutStrengthVal = document.getElementById("mutStrengthVal");
+        
+        this.targetXInput = document.getElementById("targetXInput");
+        this.targetXVal = document.getElementById("targetXVal");
 
         this.onStart = null;
         this.onPause = null;
@@ -43,7 +54,7 @@ export class UIController {
             this.notifyConfigUpdated();
         });
 
-        // Logika pro zaškrtávací políčko (povolení/zakázání textového pole)
+        // Logika pro zaškrtávací políčko
         this.infiniteRunInput.addEventListener("change", () => {
             const isInfinite = this.infiniteRunInput.checked;
             this.maxGenInput.disabled = isInfinite;
@@ -60,6 +71,34 @@ export class UIController {
             CONFIG.EVOLUTION.MAX_GENERATIONS = parseInt(this.maxGenInput.value, 10);
             this.notifyConfigUpdated();
         });
+
+        // --- NOVÉ: Logika pro posuvníky ---
+        if (this.geneLengthInput) {
+            this.geneLengthInput.addEventListener("input", (e) => {
+                const val = parseInt(e.target.value, 10);
+                if (this.geneLengthVal) this.geneLengthVal.innerText = val;
+                CONFIG.EVOLUTION.GENE_LENGTH = val;
+                this.notifyConfigUpdated();
+            });
+        }
+
+        if (this.mutStrengthInput) {
+            this.mutStrengthInput.addEventListener("input", (e) => {
+                const val = parseInt(e.target.value, 10);
+                if (this.mutStrengthVal) this.mutStrengthVal.innerText = val;
+                CONFIG.EVOLUTION.MUTATION_STRENGTH = val;
+                this.notifyConfigUpdated();
+            });
+        }
+
+        if (this.targetXInput) {
+            this.targetXInput.addEventListener("input", (e) => {
+                const val = parseInt(e.target.value, 10);
+                if (this.targetXVal) this.targetXVal.innerText = val;
+                CONFIG.SIMULATION.TARGET_X = val;
+                this.notifyConfigUpdated();
+            });
+        }
     }
 
     notifyConfigUpdated() {
