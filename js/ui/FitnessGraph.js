@@ -1,3 +1,4 @@
+// FitnessGraph.js
 export class FitnessGraph {
     constructor(canvas) {
         this.canvas = canvas;
@@ -40,16 +41,49 @@ export class FitnessGraph {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Popisky os
+        // Popisek osy X
         ctx.fillStyle = "#555";
         ctx.font = "12px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("Generace", w / 2, h - 10); // X popisek
+        ctx.fillText("Generace", w / 2, h - 5); 
+
+        // --- OPRAVENÉ ČÍSLOVÁNÍ OSY X ---
+        ctx.font = "10px sans-serif";
+        const numPoints = this.history.length;
         
+        if (numPoints > 0) {
+            // Vypočítáme krok, aby bylo na ose zhruba 5 orientačních bodů
+            const step = Math.max(1, Math.ceil(numPoints / 5)); 
+
+            for (let i = 0; i < numPoints; i++) {
+                // Vykreslíme popisek jen pro první, poslední a každou 'step' generaci.
+                // Podmínka navíc hlídá, aby se předposlední číslo nepletlo přes to poslední.
+                if (i === 0 || i === numPoints - 1 || (i % step === 0 && (numPoints - 1 - i) > step * 0.5)) {
+                    
+                    const xPos = numPoints === 1 ? p : p + (i / (numPoints - 1)) * (w - p * 1.5);
+                    const genNum = i + 1; // Generace se počítají od 1
+
+                    // Značka (čárka) na ose
+                    ctx.beginPath();
+                    ctx.moveTo(xPos, h - p);
+                    ctx.lineTo(xPos, h - p + 5);
+                    ctx.stroke();
+
+                    // Číslo pod osou
+                    ctx.fillText(genNum, xPos, h - p + 18);
+                }
+            }
+        }
+        // --------------------------------
+        
+        // Popisek osy Y
         ctx.save();
         ctx.translate(15, h / 2);
         ctx.rotate(-Math.PI / 2);
-        ctx.fillText("Fitness (Vzdálenost)", 0, 0); // Y popisek
+        ctx.fillStyle = "#555";
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Fitness (Skóre)", 0, 0); 
         ctx.restore();
 
         // Hodnoty na ose Y (Max a Min)
