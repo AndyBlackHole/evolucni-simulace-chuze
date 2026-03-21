@@ -160,12 +160,21 @@ export class PhysicsEngine {
         return this.creature.currentStep >= this.creature.genes.length && this.creature.isFullyCollapsed;
     }
 
+    // Výpočet fitness
     computeFitness() {
-        const distanceToTarget = Math.abs(CONFIG.SIMULATION.TARGET_X - this.creature.bodyX);
-        let fitness = 10000 / (distanceToTarget + 1); 
+        // Počáteční vzdálenost (z config.js) - kolik musí urazit celkem
+        const startDistance = CONFIG.SIMULATION.TARGET_X - CONFIG.CREATURE.BODY_START_X;
+        
+        // Aktuální vzdálenost od cíle
+        const currentDistance = CONFIG.SIMULATION.TARGET_X - this.creature.bodyX;
+        
+        // Skóre = Kolik pixelů z celkové trasy urazila?
+        let fitness = startDistance - currentDistance;
 
+        // Pokud přešla cíl, dostane přesně tolik bodů, kolik je vzdálenost cíle (např. 500)
+        // Už žádné obrovské násobení.
         if (this.creature.bodyX >= CONFIG.SIMULATION.TARGET_X) {
-            fitness *= 10; 
+            fitness = startDistance; 
         }
 
         return fitness;
