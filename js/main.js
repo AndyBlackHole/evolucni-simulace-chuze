@@ -11,6 +11,8 @@ let isRunning = false;
 let physicsEngines = []; 
 
 let targetReached = false; 
+// Proměnná pro uchování informace o dosažení limitu generací
+let maxGenerationsReached = false; 
 
 let bestRenderer = null;
 let fitnessGraph = null;
@@ -20,12 +22,13 @@ function initialize() {
     ui = new UIController();
 
     ui.setStartCallback(() => { 
-        if (!targetReached) isRunning = true; 
+        // Pokud už jsme v cíli, start neudělá nic (musí se dát Reset)
+        if (!targetReached && !maxGenerationsReached) isRunning = true; 
     });
     ui.setPauseCallback(() => { isRunning = false; });
     ui.setResetCallback(() => { resetEvolution(); });
     
-    // --- OPRAVA: Tichý reset před startem ---
+    // --- Tichý reset před startem ---
     ui.setConfigChangeCallback(() => { 
         // Pokud simulace ještě nezačala (historie grafu je prázdná), 
         // aplikujeme nová nastavení rovnou resetem na pozadí.
@@ -42,14 +45,17 @@ function initialize() {
     requestAnimationFrame(mainLoop);
 }
 
+// Resetuje populaci a vytvoří fyzikální enginy pro všechny
 function resetEvolution() {
     isRunning = false;
-    targetReached = false; 
+    targetReached = false; // Resetujeme stav vítězství
+    maxGenerationsReached = false; // Resetujeme stav prohry
     population = new Population();
     fitnessGraph.history = [];
     startNewGenerationSim();
 }
 
+// Připraví fyziku pro všechny jedince v aktuální generaci
 function startNewGenerationSim() {
     physicsEngines = [];
     for (let creature of population.creatures) {
@@ -58,6 +64,7 @@ function startNewGenerationSim() {
     }
 }
 
+// Simuluje celou populaci naráz
 function simulateFrame() {
     const speed = CONFIG.SIMULATION.SPEED;
 
@@ -104,6 +111,7 @@ function endGeneration() {
 
     if (!CONFIG.EVOLUTION.INFINITE_RUN && population.generation >= CONFIG.EVOLUTION.MAX_GENERATIONS) {
         isRunning = false; 
+        maxGenerationsReached = true; // Zaznamenáme, že jsme narazili na limit
         console.log("Dosažen maximální počet generací.");
         renderCurrentState(); 
         return; 
@@ -115,7 +123,8 @@ function endGeneration() {
 
 function renderCurrentState() {
     if (population && population.creatures.length > 0) {
-        bestRenderer.drawPopulation(population.creatures, population.generation, targetReached);
+        // Předáváme renderu i informaci o tom, zda byl dosažen limit generací
+        bestRenderer.drawPopulation(population.creatures, population.generation, targetReached, maxGenerationsReached);
     }
     fitnessGraph.render();
 }

@@ -28,7 +28,8 @@ export const CONFIG = {
         MUTATION_STRENGTH: 20,      // maximální změna úhlu při mutaci (°)
         GENE_LENGTH: 100,           // 300 kroků
         CROSSOVER_RATE: 0.85,       // pravděpodobnost křížení dvou rodičů
-        ELITISM_COUNT: 1,           // nejlepší jedinec přežije nezměněn
+        ELITISM_ENABLED: true,      // NOVÉ: Možnost zapnout/vypnout elitismus
+        ELITISM_COUNT: 1,           // nejlepší jedinec přežije nezměněn (pokud je elitismus zapnutý)
         INFINITE_RUN: true,         // nekonečný běh
         MAX_GENERATIONS: 50         // limit generací
     },

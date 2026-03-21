@@ -100,13 +100,14 @@ export class Population {
     // Vytvoří novou generaci
     createNextGeneration() {
         const size = CONFIG.EVOLUTION.POPULATION_SIZE;
-        const elitism = CONFIG.EVOLUTION.ELITISM_COUNT;
+        // NOVÉ: Kontrola, zda je elitismus vůbec zapnutý
+        const elitism = CONFIG.EVOLUTION.ELITISM_ENABLED ? CONFIG.EVOLUTION.ELITISM_COUNT : 0;
         const crossoverRate = CONFIG.EVOLUTION.CROSSOVER_RATE;
 
         const sorted = this.getSortedByFitness();
         const newPop = [];
 
-        // 1) Elitismus – nejlepší jedinci přežijí
+        // 1) Elitismus – nejlepší jedinci přežijí (pokud je elitismus > 0)
         for (let i = 0; i < elitism; i++) {
             const e = sorted[i];
             const clone = new Creature(e.cloneGenes());
