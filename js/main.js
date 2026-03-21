@@ -63,7 +63,7 @@ function simulateFrame() {
         // Krok fyziky pro každého tvora
         for (let engine of physicsEngines) {
             
-            // NOVÉ: Okamžitá kontrola vítězství v daném kroku!
+            // Okamžitá kontrola vítězství v daném kroku!
             if (engine.creature.bodyX >= CONFIG.SIMULATION.TARGET_X) {
                 isRunning = false;
                 targetReached = true;
@@ -73,6 +73,10 @@ function simulateFrame() {
                     population.creatures[j].setFitness(physicsEngines[j].computeFitness());
                 }
                 
+                // Musíme ohlásit vítězství i grafu, jinak bude o generaci pozadu!
+                const best = population.getBestCreature();
+                fitnessGraph.addDataPoint(best.fitness);
+
                 renderCurrentState(); // Vykreslíme vítěznou obrazovku
                 return; // Definitivně vyskočíme ze smyčky
             }
