@@ -42,40 +42,56 @@ export class UIController {
         this.btnPause.addEventListener("click", () => { if (this.onPause) this.onPause(); });
         this.btnReset.addEventListener("click", () => { if (this.onReset) this.onReset(); });
 
+        // 1) Velikost populace
         this.populationSizeInput.addEventListener("change", () => {
-            CONFIG.EVOLUTION.POPULATION_SIZE = parseInt(this.populationSizeInput.value, 10);
+            let val = parseInt(this.populationSizeInput.value, 10);
+            if (isNaN(val)) val = 60; 
+            val = Math.max(10, Math.min(500, val));
+            this.populationSizeInput.value = val;
+            CONFIG.EVOLUTION.POPULATION_SIZE = val;
             this.notifyConfigUpdated();
         });
 
+        // 2) Mutation rate
         this.mutationRateInput.addEventListener("change", () => {
-            CONFIG.EVOLUTION.MUTATION_RATE = parseFloat(this.mutationRateInput.value);
+            let val = parseFloat(this.mutationRateInput.value);
+            // PRIDANO: Ošetření proti textu
+            if (isNaN(val)) val = 0.08;
+            val = Math.max(0, Math.min(1, val)); 
+            this.mutationRateInput.value = val;
+            CONFIG.EVOLUTION.MUTATION_RATE = val;
             this.notifyConfigUpdated();
         });
 
+        // 3) Rychlost simulace
         this.simSpeedInput.addEventListener("input", () => {
-            CONFIG.SIMULATION.SPEED = parseInt(this.simSpeedInput.value, 10);
+            let val = parseInt(this.simSpeedInput.value, 10);
+            // PRIDANO: Ošetření proti textu
+            if (isNaN(val)) val = 1;
+            val = Math.max(1, Math.min(5, val)); 
+            CONFIG.SIMULATION.SPEED = val;
             this.notifyConfigUpdated();
         });
 
-        // Logika pro zaškrtávací políčko (Nekonečný běh)
+        // 4) Logika pro nekonečný běh
         this.infiniteRunInput.addEventListener("change", () => {
             const isInfinite = this.infiniteRunInput.checked;
             this.maxGenInput.disabled = isInfinite;
             this.maxGenLabel.style.opacity = isInfinite ? "0.5" : "1";
-            
             CONFIG.EVOLUTION.INFINITE_RUN = isInfinite;
-            if (!isInfinite) {
-                CONFIG.EVOLUTION.MAX_GENERATIONS = parseInt(this.maxGenInput.value, 10);
-            }
             this.notifyConfigUpdated();
         });
 
+        // 5) Max generací
         this.maxGenInput.addEventListener("change", () => {
-            CONFIG.EVOLUTION.MAX_GENERATIONS = parseInt(this.maxGenInput.value, 10);
+            let val = parseInt(this.maxGenInput.value, 10);
+            if (isNaN(val)) val = 50;
+            val = Math.max(1, Math.min(1000, val));
+            this.maxGenInput.value = val;
+            CONFIG.EVOLUTION.MAX_GENERATIONS = val;
             this.notifyConfigUpdated();
         });
 
-        // --- NOVÉ: Logika pro elitismus ---
         if (this.elitismInput) {
             this.elitismInput.addEventListener("change", () => {
                 CONFIG.EVOLUTION.ELITISM_ENABLED = this.elitismInput.checked;
@@ -83,28 +99,36 @@ export class UIController {
             });
         }
 
-        // Logika pro posuvníky
+        // 6) Délka genomu (posuvník)
         if (this.geneLengthInput) {
             this.geneLengthInput.addEventListener("input", (e) => {
-                const val = parseInt(e.target.value, 10);
+                let val = parseInt(e.target.value, 10);
+                if (isNaN(val)) val = 100;
+                val = Math.max(20, Math.min(300, val)); 
                 if (this.geneLengthVal) this.geneLengthVal.innerText = val;
                 CONFIG.EVOLUTION.GENE_LENGTH = val;
                 this.notifyConfigUpdated();
             });
         }
 
+        // 7) Síla mutace (posuvník)
         if (this.mutStrengthInput) {
             this.mutStrengthInput.addEventListener("input", (e) => {
-                const val = parseInt(e.target.value, 10);
+                let val = parseInt(e.target.value, 10);
+                if (isNaN(val)) val = 25;
+                val = Math.max(1, Math.min(90, val));
                 if (this.mutStrengthVal) this.mutStrengthVal.innerText = val;
                 CONFIG.EVOLUTION.MUTATION_STRENGTH = val;
                 this.notifyConfigUpdated();
             });
         }
 
+        // 8) Vzdálenost cíle (posuvník)
         if (this.targetXInput) {
             this.targetXInput.addEventListener("input", (e) => {
-                const val = parseInt(e.target.value, 10);
+                let val = parseInt(e.target.value, 10);
+                if (isNaN(val)) val = 500;
+                val = Math.max(200, Math.min(1000, val));
                 if (this.targetXVal) this.targetXVal.innerText = val;
                 CONFIG.SIMULATION.TARGET_X = val;
                 this.notifyConfigUpdated();
