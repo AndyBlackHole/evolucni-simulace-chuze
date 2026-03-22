@@ -105,7 +105,7 @@ export class UIController {
                 let val = parseInt(e.target.value, 10);
                 if (isNaN(val)) val = 100;
                 val = Math.max(20, Math.min(300, val)); 
-                if (this.geneLengthVal) this.geneLengthVal.innerText = val;
+                if (this.geneLengthVal) this.geneLengthVal.innerText = val+ " instrukcí";
                 CONFIG.EVOLUTION.GENE_LENGTH = val;
                 this.notifyConfigUpdated();
             });
@@ -117,7 +117,7 @@ export class UIController {
                 let val = parseInt(e.target.value, 10);
                 if (isNaN(val)) val = 25;
                 val = Math.max(1, Math.min(90, val));
-                if (this.mutStrengthVal) this.mutStrengthVal.innerText = val;
+                if (this.mutStrengthVal) this.mutStrengthVal.innerText = val + "°";
                 CONFIG.EVOLUTION.MUTATION_STRENGTH = val;
                 this.notifyConfigUpdated();
             });
@@ -131,7 +131,7 @@ export class UIController {
                 val = Math.max(200, Math.min(1000, val));
                 
                 // Zobrazení čisté vzdálenosti v UI (např. "500")
-                if (this.targetXVal) this.targetXVal.innerText = val;
+                if (this.targetXVal) this.targetXVal.innerText = val + " px";
                 
                 // Fyzická pozice vlaječky na plátně = Vzdálenost + Pozice startu (130)
                 CONFIG.SIMULATION.TARGET_X = val + CONFIG.CREATURE.BODY_START_X;
